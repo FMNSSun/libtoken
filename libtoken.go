@@ -88,6 +88,8 @@ var digitsAlphabet []byte = []byte("0123456789")
 // this doesn't contain '"` because they are easily confused. 
 var symbolsAlphabet []byte = []byte("+-*/@&^%|$#!?[]{}()\\:,.;=")
 
+// be aware there can at most be 255 alphabets and
+// an alphabet must not be longer than 255. 
 func selectNFrom(N int, alphabets [][]byte) []byte {
 	a := make([]byte, N)
 	j := make([]byte, N)
