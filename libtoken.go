@@ -191,6 +191,35 @@ func NewLettersSymbolsDigitsGenerator(N int) (TokenGenerator, error) {
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N using the alphabet provided. The alphabet
+// must not be larger than 255 runes. 
+func NewAlphabetGenerator(N int, alphabet []rune) (TokenGenerator, error) {
+	if len(alphabet) > 255 {
+		return nil, fmt.Errorf("Alphabet is too large! [%d]", len(alphabet))
+	}
+
+	// Protect against people making use of alphabet
+	// later on. 
+	alphabet_ := make([]rune, len(alphabet))
+	copy(alphabet_, alphabet)
+
+	return generator(func() string {
+		indexes := make([]byte, N)
+		runes := make([]rune, N)
+		ReadBytes(indexes)
+
+		alphabetSize := byte(len(alphabet_))
+
+		for i := 0; i < N; i++ {
+			index := indexes[i] % alphabetSize
+			runes[i] = alphabet_[index]
+		}
+
+		return string(runes)
+	}), nil
+}
+
 // Returns the names of all available token generators.
 func TokenGenerators() []string {
 	keys := make([]string, len(tokenGenerators))
