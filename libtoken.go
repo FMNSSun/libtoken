@@ -84,6 +84,8 @@ func NewDummyGenerator(N int) (TokenGenerator, error) {
 var lowerCaseAlphabet []byte = []byte("abcdefghijklmnopqrstuvwxyz")
 var upperCaseAlphabet []byte = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 var digitsAlphabet []byte = []byte("0123456789")
+
+// this doesn't contain '"` because they are easily confused. 
 var symbolsAlphabet []byte = []byte("+-*/@&^%|$#!?[]{}()\\:,.;=")
 
 func selectNFrom(N int, alphabets [][]byte) []byte {
