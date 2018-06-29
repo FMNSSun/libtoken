@@ -27,26 +27,32 @@ func main() {
 		panic(err.Error())
 	}
 
-	fmt.Printf("%30s\t%s\n", "custom", tg.Generate())
+	fmt.Printf("%30s\t%s\n", "* custom", tg.Generate())
+
+	tgPrefix, err := libtoken.NewAlphabetGenerator(4,[]rune("012"))
+	tgTail, err := libtoken.NewAlphabetGenerator(4,[]rune("abcdef"))
+
+	fmt.Printf("%30s\t%s\n", "* join", libtoken.Join("-", tgPrefix, tgTail, tgTail))
 }
 ```
 
 ```
 $ ./example 
-                        digits	37456344
-                  lcase&digits	61q18y9t
-                           hex	379d5407f1626842
-                       symbols	#+$^@!@+
-                letters&digits	W4109Xi8
-                           b64	sdzZ7Y/TFQU=
-                         lcase	etdczawv
-        letters&symbols&digits	@8n+bAZ%
-                           b32	NRS6ZBOXGKKBS===
+                           b64	5Lz6OpoKaqM=
+               letters&symbols	w}bV:!DG
+                 lcase&symbols	dc!?{ge/
+                       letters	MKBaARnJ
+        letters&symbols&digits	[Ux1KYlL
+                         ucase	SEQDYJPG
+                        digits	53499486
+                  lcase&digits	029711t1
+                  ucase&digits	03T2A73Q
+                           hex	a441ebb2b7f7ff17
                          dummy	AAAAAAAA
-                         ucase	FQAWIQYI
-                  ucase&digits	S101O1H4
-                 lcase&symbols	uf/xn|+w
-                       letters	cxEBqMXd
-               letters&symbols	V^+*MbO/
-                        custom	ûûàà
+                           b32	F5Z3D4RKAR53E===
+                         lcase	lmknragi
+                       symbols	[/-[&^!|
+                letters&digits	01SEyV10
+                      * custom	üüüü
+                        * join	2001-abbf-fcde
 ```
