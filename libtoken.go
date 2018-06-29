@@ -19,10 +19,25 @@ type TokenGenerator interface {
 	Generate() string
 }
 
+// Generate a token using the default TokenGenerator.
+// See `SetDefaultTokenGenerator`. Do not call this without
+// having set a default TokenGenerator.
+func Generate() string {
+	return defaultTokenGenerator.Generate()
+}
+
+var defaultTokenGenerator TokenGenerator = nil
+
+func SetDefaultTokenGenerator(tg TokenGenerator) {
+	defaultTokenGenerator = tg
+}
+
+// "Wrapper" type to construct TokenGenerators. 
 type NewTokenGeneratorF func(int) (TokenGenerator, error)
 
 type generator func() string
 
+// 'Invokes itself'. 
 func (g generator) Generate() string {
 	return g()
 }
@@ -88,66 +103,88 @@ func selectNFrom(N int, alphabets [][]byte) []byte {
 	return t
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of lower case letters.
 func NewLowerCaseGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of upper case letters.
 func NewUpperCaseGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{upperCaseAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of digits.
 func NewDigitsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{digitsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of symbols.
 func NewSymbolsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{symbolsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of lower case letters and digits.
 func NewLowerCaseDigitsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, digitsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of upper case letters and digits.
 func NewUpperCaseDigitsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{upperCaseAlphabet, digitsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of lower case letters and symbols.
 func NewLowerCaseSymbolsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, symbolsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of letters.
 func NewLettersGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of letters and digits.
 func NewLettersDigitsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet, digitsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of letters and symbols.
 func NewLettersSymbolsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet, symbolsAlphabet}))
 	}), nil
 }
 
+// Returns a new token generator returning tokens
+// of length N consisting of letters, symbols and digits.
 func NewLettersSymbolsDigitsGenerator(N int) (TokenGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet, digitsAlphabet, symbolsAlphabet}))
