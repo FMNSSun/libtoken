@@ -1,6 +1,8 @@
 # rndstring
 
-Library to generate tokens (or random strings). 
+Library to generate tokens (or random strings) backed up by
+golang's cryptographically secure random number generator crypto/rand
+if available. 
 
 ## Examples:
 
