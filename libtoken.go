@@ -1,4 +1,4 @@
-package libtoken
+package rndstring
 
 import crand "crypto/rand"
 import mrand "math/rand"
@@ -10,30 +10,30 @@ import "encoding/base32"
 import "fmt"
 import "strings"
 
-// A TokenGenerator generates random
-// (string) tokens using a cryptographically
+// A StringGenerator generates random
+// (string) strings using a cryptographically
 // strong random number generator. 
-type TokenGenerator interface {
-	// Generates and returns a new token. Is safe
+type StringGenerator interface {
+	// Generates and returns a new string. Is safe
 	// for concurrent use. 
 	Generate() string
 }
 
-// Generate a token using the default TokenGenerator.
-// See `SetDefaultTokenGenerator`. Do not call this without
-// having set a default TokenGenerator.
+// Generate a string using the default StringGenerator.
+// See `SetDefaultStringGenerator`. Do not call this without
+// having set a default StringGenerator.
 func Generate() string {
-	return defaultTokenGenerator.Generate()
+	return defaultStringGenerator.Generate()
 }
 
-var defaultTokenGenerator TokenGenerator = nil
+var defaultStringGenerator StringGenerator = nil
 
-func SetDefaultTokenGenerator(tg TokenGenerator) {
-	defaultTokenGenerator = tg
+func SetDefaultStringGenerator(tg StringGenerator) {
+	defaultStringGenerator = tg
 }
 
-// "Wrapper" type to construct TokenGenerators. 
-type NewTokenGeneratorF func(int) (TokenGenerator, error)
+// "Wrapper" type to construct StringGenerators. 
+type NewStringGeneratorF func(int) (StringGenerator, error)
 
 type generator func() string
 
@@ -42,40 +42,40 @@ func (g generator) Generate() string {
 	return g()
 }
 
-// Returns a new token generator returning tokens 
+// Returns a new string generator returning strings 
 // of length N hex encoded. (Thus the size of the
-// returned token string is N*2). 
-func NewHexGenerator(N int) (TokenGenerator, error) {
+// returned string string is N*2). 
+func NewHexGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		b := RandomBytes(N)
 		return hex.EncodeToString(b)
 	}), nil
 }
 
-// Returns a new token generator returning tokens 
+// Returns a new string generator returning strings 
 // of length N base64 encoded. (Thus the size of the
-// returned token string is longer than N). 
-func NewBase64Generator(N int) (TokenGenerator, error) {
+// returned string string is longer than N). 
+func NewBase64Generator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		b := RandomBytes(N)
 		return base64.StdEncoding.EncodeToString(b)
 	}), nil
 }
 
-// Returns a new token generator returning tokens 
+// Returns a new string generator returning strings 
 // of length N base32 encoded. (Thus the size of the
-// returned token string is longer than N). 
-func NewBase32Generator(N int) (TokenGenerator, error) {
+// returned string string is longer than N). 
+func NewBase32Generator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		b := RandomBytes(N)
 		return base32.StdEncoding.EncodeToString(b)
 	}), nil
 }
 
-// Returns a new token generator returning tokens 
+// Returns a new string generator returning strings 
 // of length N. This just repeats the letter A. Don't use
 // this in production!
-func NewDummyGenerator(N int) (TokenGenerator, error) {
+func NewDummyGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return strings.Repeat("A", N)
 	}), nil
@@ -107,98 +107,98 @@ func selectNFrom(N int, alphabets [][]byte) []byte {
 	return t
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of lower case letters.
-func NewLowerCaseGenerator(N int) (TokenGenerator, error) {
+func NewLowerCaseGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of upper case letters.
-func NewUpperCaseGenerator(N int) (TokenGenerator, error) {
+func NewUpperCaseGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{upperCaseAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of digits.
-func NewDigitsGenerator(N int) (TokenGenerator, error) {
+func NewDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{digitsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of symbols.
-func NewSymbolsGenerator(N int) (TokenGenerator, error) {
+func NewSymbolsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{symbolsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of lower case letters and digits.
-func NewLowerCaseDigitsGenerator(N int) (TokenGenerator, error) {
+func NewLowerCaseDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, digitsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of upper case letters and digits.
-func NewUpperCaseDigitsGenerator(N int) (TokenGenerator, error) {
+func NewUpperCaseDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{upperCaseAlphabet, digitsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of lower case letters and symbols.
-func NewLowerCaseSymbolsGenerator(N int) (TokenGenerator, error) {
+func NewLowerCaseSymbolsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, symbolsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of letters.
-func NewLettersGenerator(N int) (TokenGenerator, error) {
+func NewLettersGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of letters and digits.
-func NewLettersDigitsGenerator(N int) (TokenGenerator, error) {
+func NewLettersDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet, digitsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of letters and symbols.
-func NewLettersSymbolsGenerator(N int) (TokenGenerator, error) {
+func NewLettersSymbolsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet, symbolsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N consisting of letters, symbols and digits.
-func NewLettersSymbolsDigitsGenerator(N int) (TokenGenerator, error) {
+func NewLettersSymbolsDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		return string(selectNFrom(N, [][]byte{lowerCaseAlphabet, upperCaseAlphabet, digitsAlphabet, symbolsAlphabet}))
 	}), nil
 }
 
-// Returns a new token generator returning tokens
+// Returns a new string generator returning strings
 // of length N using the alphabet provided. The alphabet
 // must not be larger than 255 runes. 
-func NewAlphabetGenerator(N int, alphabet []rune) (TokenGenerator, error) {
+func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 	if len(alphabet) > 255 {
 		return nil, fmt.Errorf("Alphabet is too large! [%d]", len(alphabet))
 	}
@@ -224,18 +224,18 @@ func NewAlphabetGenerator(N int, alphabet []rune) (TokenGenerator, error) {
 	}), nil
 }
 
-// Returns the names of all available token generators.
-func TokenGenerators() []string {
-	keys := make([]string, len(tokenGenerators))
+// Returns the names of all available string generators.
+func StringGenerators() []string {
+	keys := make([]string, len(stringGenerators))
 	i := 0;
-	for k := range tokenGenerators {
+	for k := range stringGenerators {
 		keys[i] = k
 		i++
 	}
 	return keys
 }
 
-var tokenGenerators map[string]NewTokenGeneratorF = map[string]NewTokenGeneratorF {
+var stringGenerators map[string]NewStringGeneratorF = map[string]NewStringGeneratorF {
 	"hex" : NewHexGenerator,
 	"b64" : NewBase64Generator,
 	"b32" : NewBase32Generator,
@@ -253,9 +253,9 @@ var tokenGenerators map[string]NewTokenGeneratorF = map[string]NewTokenGenerator
 	"letters&symbols&digits" : NewLettersSymbolsDigitsGenerator,
 }
 
-// Joins the tokens generated by the generators together using the
+// Joins the strings generated by the generators together using the
 // specified delimiter. 
-func Join(delim string, generators ...TokenGenerator) string {
+func Join(delim string, generators ...StringGenerator) string {
 	parts := make([]string, len(generators))
 
 	for i, g := range generators {
@@ -265,27 +265,27 @@ func Join(delim string, generators ...TokenGenerator) string {
 	return strings.Join(parts, delim)
 }
 
-// Registers a TokenGenerator. This panics if there's already
+// Registers a StringGenerator. This panics if there's already
 // one registered under the specified name. 
-func RegisterTokenGenerator(name string, f NewTokenGeneratorF) {
-	_, ok := tokenGenerators[name]
+func RegisterStringGenerator(name string, f NewStringGeneratorF) {
+	_, ok := stringGenerators[name]
 
 	if ok {
-		panic("TokenGenerator already registered!")
+		panic("StringGenerator already registered!")
 	}
 
-	tokenGenerators[name] = f
+	stringGenerators[name] = f
 }
 
-// Returns a new TokenGenerator by name and length. Length may
+// Returns a new StringGenerator by name and length. Length may
 // either refer to the total length of the string or the amount
 // of bytes it encodes (this is for example the case when using base32,
 // base64 or hex). 
-func NewTokenGenerator(name string, N int)  (TokenGenerator, error) {
-	fn := tokenGenerators[name]
+func NewStringGenerator(name string, N int)  (StringGenerator, error) {
+	fn := stringGenerators[name]
 
 	if fn == nil {
-		return nil, fmt.Errorf("No TokenGenerator registered under %q!", name)
+		return nil, fmt.Errorf("No StringGenerator registered under %q!", name)
 	}
 
 	it, err := fn(N)
