@@ -1,10 +1,10 @@
-package libtoken
+package rndstring
 
 import "testing"
 
 func TestAPI(t *testing.T) {
-	tg1, _ := NewTokenGenerator("dummy", 4)
-	tg2, _ := NewTokenGenerator("dummy", 3)
+	tg1, _ := NewStringGenerator("dummy", 4)
+	tg2, _ := NewStringGenerator("dummy", 3)
 
 	token := Join("-", tg1, tg2)
 
