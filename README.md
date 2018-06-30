@@ -1,4 +1,4 @@
-# libtoken
+# rndstring
 
 Library to generate tokens (or random strings). 
 
@@ -7,12 +7,12 @@ Library to generate tokens (or random strings).
 ```go
 package main
 
-import "github.com/FMNSSun/libtoken"
+import "github.com/FMNSSun/rndstring"
 import "fmt"
 
 func main() {
-	for _, tgName := range libtoken.TokenGenerators() {
-		tg, err := libtoken.NewTokenGenerator(tgName, 8)
+	for _, tgName := range rndstring.StringGenerators() {
+		tg, err := rndstring.NewStringGenerator(tgName, 8)
 
 		if err != nil {
 			panic(err.Error())
@@ -21,7 +21,7 @@ func main() {
 		fmt.Printf("%30s\t%s\n", tgName, tg.Generate())
 	}
 
-	tg, err := libtoken.NewAlphabetGenerator(4,[]rune("ûüà"))
+	tg, err := rndstring.NewAlphabetGenerator(4,[]rune("ûüà"))
 
 	if err != nil {
 		panic(err.Error())
@@ -29,10 +29,10 @@ func main() {
 
 	fmt.Printf("%30s\t%s\n", "* custom", tg.Generate())
 
-	tgPrefix, err := libtoken.NewAlphabetGenerator(4,[]rune("012"))
-	tgTail, err := libtoken.NewAlphabetGenerator(4,[]rune("abcdef"))
+	tgPrefix, err := rndstring.NewAlphabetGenerator(4,[]rune("012"))
+	tgTail, err := rndstring.NewAlphabetGenerator(4,[]rune("abcdef"))
 
-	fmt.Printf("%30s\t%s\n", "* join", libtoken.Join("-", tgPrefix, tgTail, tgTail))
+	fmt.Printf("%30s\t%s\n", "* join", rndstring.Join("-", tgPrefix, tgTail, tgTail))
 }
 ```
 
