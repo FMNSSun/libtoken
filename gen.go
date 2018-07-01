@@ -226,6 +226,10 @@ func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 	copy(alphabet_, alphabet)
 
 	return generator(func() string {
+		if N < 0 {
+			return ""
+		}
+	
 		indexes := make([]byte, N)
 		runes := make([]rune, N)
 		ReadBytes(indexes)
