@@ -12,10 +12,10 @@ import "strings"
 
 // A StringGenerator generates random
 // (string) strings using a cryptographically
-// strong random number generator. 
+// strong random number generator.
 type StringGenerator interface {
 	// Generates and returns a new string. Is safe
-	// for concurrent use. 
+	// for concurrent use.
 	Generate() string
 }
 
@@ -32,19 +32,20 @@ func SetDefaultStringGenerator(tg StringGenerator) {
 	defaultStringGenerator = tg
 }
 
-// "Wrapper" type to construct StringGenerators. 
+// "Wrapper" type to construct StringGenerators.
+// Negative lengths will result in empty strings.
 type NewStringGeneratorF func(int) (StringGenerator, error)
 
 type generator func() string
 
-// 'Invokes itself'. 
+// 'Invokes itself'.
 func (g generator) Generate() string {
 	return g()
 }
 
-// Returns a new string generator returning strings 
-// of length N hex encoded. (Thus the size of the
-// returned string string is N*2). 
+// NewHexGenerator returns a new string generator returning
+// N bytes hex encoded. (Thus the size of the
+// returned string string is N*2).
 func NewHexGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		b := RandomBytes(N)
@@ -52,9 +53,9 @@ func NewHexGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings 
-// of length N base64 encoded. (Thus the size of the
-// returned string string is longer than N). 
+// NewBase64Generator returns a new string generator returning
+// N bytes base64 encoded. (Thus the size of the
+// returned string string is longer than N).
 func NewBase64Generator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		b := RandomBytes(N)
@@ -62,9 +63,19 @@ func NewBase64Generator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings 
-// of length N base32 encoded. (Thus the size of the
-// returned string string is longer than N). 
+// NewBase64URLGenerator returns a new string generator returning
+// N byte base64-url encoded WITHOUT padding. (Thus the size of the
+// returned string string is longer than N).
+func NewBase64URLGenerator(N int) (StringGenerator, error) {
+	return generator(func() string {
+		b := RandomBytes(N)
+		return base64.RawURLEncoding.EncodeToString(b)
+	}), nil
+}
+
+// NewBase32Generator returns a new string generator returning
+// N bytes base32 encoded. (Thus the size of the
+// returned string string is longer than N).
 func NewBase32Generator(N int) (StringGenerator, error) {
 	return generator(func() string {
 		b := RandomBytes(N)
@@ -72,7 +83,7 @@ func NewBase32Generator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings 
+// NewDummyGenerator returns a new string generator returning strings
 // of length N. This just repeats the letter A. Don't use
 // this in production!
 func NewDummyGenerator(N int) (StringGenerator, error) {
@@ -85,11 +96,11 @@ var lowerCaseAlphabet []byte = []byte("abcdefghijklmnopqrstuvwxyz")
 var upperCaseAlphabet []byte = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 var digitsAlphabet []byte = []byte("0123456789")
 
-// this doesn't contain '"` because they are easily confused. 
+// this doesn't contain '"` because they are easily confused.
 var symbolsAlphabet []byte = []byte("+-*/@&^%|$#!?[]{}()\\:,.;=")
 
 // be aware there can at most be 255 alphabets and
-// an alphabet must not be longer than 255. 
+// an alphabet must not be longer than 255.
 func selectNFrom(N int, alphabets [][]byte) []byte {
 	if N < 0 {
 		return []byte{}
@@ -112,22 +123,38 @@ func selectNFrom(N int, alphabets [][]byte) []byte {
 }
 
 var lettersSymbolsDigits [][]byte = [][]byte{lowerCaseAlphabet, upperCaseAlphabet, digitsAlphabet, symbolsAlphabet}
+var lettersDigits [][]byte = [][]byte{lowerCaseAlphabet, upperCaseAlphabet, digitsAlphabet}
 
-// Returns a random string of length N consisting of letters, digits and symbols.
+// RandomPassword returns a random password.
+// If you want to generate random passwords this is the way to go.
+// The length of the returned string is 18.
+func RandomPassword() string {
+	return RandomString(18)
+}
+
+// RandomAPIToken returns a random API token.
+// If you want to generate random API tokens this is the way to go.
+// The length of the returned string is 24 which amounts to roughly
+// 143bits. It contains only letters and digits.
+func RandomAPIToken() string {
+	return string(selectNFrom(24, lettersDigits))
+}
+
+// RandomString returns a random string of length N consisting of letters, digits and symbols.
 // If you just want to generate a random ascii string this is the easiest way.
 func RandomString(N int) string {
 	return string(selectNFrom(N, lettersSymbolsDigits))
 }
 
-// Returns a random IPv4 address.
+// RandomIPv4 returns a random IPv4 address.
 func RandomIPv4() string {
 	ip := make([]byte, 4)
 	ReadBytes(ip)
-	
+
 	return fmt.Sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3])
 }
 
-// Returns a new string generator returning strings
+// NewLowerCaseGenerator returns a new string generator returning strings
 // of length N consisting of lower case letters.
 func NewLowerCaseGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -135,7 +162,7 @@ func NewLowerCaseGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewUpperCaseGenerator returns a new string generator returning strings
 // of length N consisting of upper case letters.
 func NewUpperCaseGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -143,7 +170,7 @@ func NewUpperCaseGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewDigitsGenerator returns a new string generator returning strings
 // of length N consisting of digits.
 func NewDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -151,7 +178,7 @@ func NewDigitsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewSymbolsGenerator returns a new string generator returning strings
 // of length N consisting of symbols.
 func NewSymbolsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -159,7 +186,7 @@ func NewSymbolsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewLowerCaseDigitsGenerator returns a new string generator returning strings
 // of length N consisting of lower case letters and digits.
 func NewLowerCaseDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -167,7 +194,7 @@ func NewLowerCaseDigitsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewUpperCaseDigitsGenerator returns a new string generator returning strings
 // of length N consisting of upper case letters and digits.
 func NewUpperCaseDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -175,7 +202,7 @@ func NewUpperCaseDigitsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewLowerCaseSymbolsGenerator returns a new string generator returning strings
 // of length N consisting of lower case letters and symbols.
 func NewLowerCaseSymbolsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -183,7 +210,7 @@ func NewLowerCaseSymbolsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewLettersGenerator returns a new string generator returning strings
 // of length N consisting of letters.
 func NewLettersGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -191,7 +218,7 @@ func NewLettersGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewLettersDigitsGenerator returns a new string generator returning strings
 // of length N consisting of letters and digits.
 func NewLettersDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -199,7 +226,7 @@ func NewLettersDigitsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewLettersSymbolsGenerator returns a new string generator returning strings
 // of length N consisting of letters and symbols.
 func NewLettersSymbolsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -207,7 +234,7 @@ func NewLettersSymbolsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewLettersSymbolsDigitsGenerator returns a new string generator returning strings
 // of length N consisting of letters, symbols and digits.
 func NewLettersSymbolsDigitsGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -215,14 +242,14 @@ func NewLettersSymbolsDigitsGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// This is just an alias for NewLettersSymbolsDigitsGenerator
+// NewASCIIGenerator is just an alias for NewLettersSymbolsDigitsGenerator
 func NewASCIIGenerator(N int) (StringGenerator, error) {
 	return NewLettersSymbolsDigitsGenerator(N)
 }
 
 var hexStrAlphabet []byte = []byte("0123456789abcdef")
 
-// Returns a new string generator returning strings
+// NewHexStrGenerator returns a new string generator returning strings
 // of exactly length N consisting of 0-9 and a-f.
 func NewHexStrGenerator(N int) (StringGenerator, error) {
 	return generator(func() string {
@@ -230,16 +257,16 @@ func NewHexStrGenerator(N int) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns a new string generator returning strings
+// NewAlphabetGenerator returns a new string generator returning strings
 // of length N using the alphabet provided. The alphabet
-// must not be larger than 255 runes. 
+// must not be larger than 255 runes.
 func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 	if len(alphabet) > 255 {
 		return nil, fmt.Errorf("Alphabet is too large! [%d]", len(alphabet))
 	}
 
 	// Protect against people making use of alphabet
-	// later on. 
+	// later on.
 	alphabet_ := make([]rune, len(alphabet))
 	copy(alphabet_, alphabet)
 
@@ -247,7 +274,7 @@ func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 		if N < 0 {
 			return ""
 		}
-	
+
 		indexes := make([]byte, N)
 		runes := make([]rune, N)
 		ReadBytes(indexes)
@@ -263,10 +290,10 @@ func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 	}), nil
 }
 
-// Returns the names of all available string generators.
+// StringGenerators returns the names of all available string generators.
 func StringGenerators() []string {
 	keys := make([]string, len(stringGenerators))
-	i := 0;
+	i := 0
 	for k := range stringGenerators {
 		keys[i] = k
 		i++
@@ -274,28 +301,29 @@ func StringGenerators() []string {
 	return keys
 }
 
-var stringGenerators map[string]NewStringGeneratorF = map[string]NewStringGeneratorF {
-	"hex" : NewHexGenerator,
-	"b64" : NewBase64Generator,
-	"b32" : NewBase32Generator,
-	"dummy" : NewDummyGenerator,
-	"lcase" : NewLowerCaseGenerator,
-	"ucase" : NewUpperCaseGenerator,
-	"digits" : NewDigitsGenerator,
-	"symbols" : NewSymbolsGenerator,
-	"lcase&digits" : NewLowerCaseDigitsGenerator,
-	"ucase&digits" : NewUpperCaseDigitsGenerator,
-	"lcase&symbols" : NewLowerCaseSymbolsGenerator,
-	"letters" : NewLettersGenerator,
-	"letters&digits" : NewLettersDigitsGenerator,
-	"letters&symbols" : NewLettersSymbolsGenerator,
-	"letters&symbols&digits" : NewLettersSymbolsDigitsGenerator,
-	"ascii" : NewLettersSymbolsDigitsGenerator,
-	"hexstr" : NewHexStrGenerator,
+var stringGenerators map[string]NewStringGeneratorF = map[string]NewStringGeneratorF{
+	"hex":                    NewHexGenerator,
+	"b64":                    NewBase64Generator,
+	"b64url":                 NewBase64URLGenerator,
+	"b32":                    NewBase32Generator,
+	"dummy":                  NewDummyGenerator,
+	"lcase":                  NewLowerCaseGenerator,
+	"ucase":                  NewUpperCaseGenerator,
+	"digits":                 NewDigitsGenerator,
+	"symbols":                NewSymbolsGenerator,
+	"lcase&digits":           NewLowerCaseDigitsGenerator,
+	"ucase&digits":           NewUpperCaseDigitsGenerator,
+	"lcase&symbols":          NewLowerCaseSymbolsGenerator,
+	"letters":                NewLettersGenerator,
+	"letters&digits":         NewLettersDigitsGenerator,
+	"letters&symbols":        NewLettersSymbolsGenerator,
+	"letters&symbols&digits": NewLettersSymbolsDigitsGenerator,
+	"ascii":                  NewLettersSymbolsDigitsGenerator,
+	"hexstr":                 NewHexStrGenerator,
 }
 
-// Joins the strings generated by the generators together using the
-// specified delimiter. 
+// Join joins the strings generated by the generators together using the
+// specified delimiter.
 func Join(delim string, generators ...StringGenerator) string {
 	parts := make([]string, len(generators))
 
@@ -306,8 +334,8 @@ func Join(delim string, generators ...StringGenerator) string {
 	return strings.Join(parts, delim)
 }
 
-// Registers a StringGenerator. This panics if there's already
-// one registered under the specified name. 
+// RegisterStringGenerator registers a StringGenerator. This panics if there's already
+// one registered under the specified name.
 func RegisterStringGenerator(name string, f NewStringGeneratorF) {
 	_, ok := stringGenerators[name]
 
@@ -318,11 +346,11 @@ func RegisterStringGenerator(name string, f NewStringGeneratorF) {
 	stringGenerators[name] = f
 }
 
-// Returns a new StringGenerator by name and length. Length may
+// NewStringGenerator returns a new StringGenerator by name and length. Length may
 // either refer to the total length of the string or the amount
 // of bytes it encodes (this is for example the case when using base32,
-// base64 or hex). 
-func NewStringGenerator(name string, N int)  (StringGenerator, error) {
+// base64 or hex).
+func NewStringGenerator(name string, N int) (StringGenerator, error) {
 	fn := stringGenerators[name]
 
 	if fn == nil {
@@ -338,7 +366,7 @@ func NewStringGenerator(name string, N int)  (StringGenerator, error) {
 	return it, nil
 }
 
-// Returns N random bytes.
+// RandomBytes returns N random bytes.
 func RandomBytes(N int) []byte {
 	b := make([]byte, N)
 
@@ -347,7 +375,7 @@ func RandomBytes(N int) []byte {
 	return b
 }
 
-// Reads len(buf) random bytes.
+// ReadBytes reads len(buf) random bytes.
 func ReadBytes(buf []byte) {
 	_, err := crand.Read(buf)
 
@@ -356,8 +384,8 @@ func ReadBytes(buf []byte) {
 	}
 }
 
-// Reads len(buf) random bytes but panics
-// if native crypto/rand returns an error. 
+// ReadBytesNoFallback reads len(buf random bytes
+// without using fall-back method.
 func ReadBytesNoFallback(buf []byte) {
 	_, err := crand.Read(buf)
 
@@ -365,7 +393,6 @@ func ReadBytesNoFallback(buf []byte) {
 		panic(err.Error())
 	}
 }
-
 
 var source mrand.Source = mrand.NewSource(time.Now().UnixNano())
 var rnd *mrand.Rand = mrand.New(source)
@@ -381,8 +408,8 @@ func skip() {
 	}
 }
 
-// Reads len(buf) random bytes using the
-// fallback method. 
+// ReadBytesFallback reads len(buf) random bytes using the
+// fall-back method.
 func ReadBytesFallback(buf []byte) {
 	mutex.Lock()
 
