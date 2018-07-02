@@ -26,13 +26,14 @@ func Generate() string {
 	return defaultStringGenerator.Generate()
 }
 
-var defaultStringGenerator StringGenerator = nil
+var defaultStringGenerator StringGenerator
 
+// SetDefaultStringGenerator sets the (global) default generator.
 func SetDefaultStringGenerator(tg StringGenerator) {
 	defaultStringGenerator = tg
 }
 
-// "Wrapper" type to construct StringGenerators.
+// NewStringGeneratorF is a wrapper type around a function constructing StringGenerators.
 // Negative lengths will result in empty strings.
 type NewStringGeneratorF func(int) (StringGenerator, error)
 
