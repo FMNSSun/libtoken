@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/FMNSSun/rndstring)](https://goreportcard.com/report/github.com/FMNSSun/rndstring)
+
 # rndstring
 
 Library to generate tokens (or random strings) backed up by
