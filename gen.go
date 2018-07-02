@@ -268,8 +268,8 @@ func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 
 	// Protect against people making use of alphabet
 	// later on.
-	alphabet_ := make([]rune, len(alphabet))
-	copy(alphabet_, alphabet)
+	alphabetCopy := make([]rune, len(alphabet))
+	copy(alphabetCopy, alphabet)
 
 	return generator(func() string {
 		if N < 0 {
@@ -280,11 +280,11 @@ func NewAlphabetGenerator(N int, alphabet []rune) (StringGenerator, error) {
 		runes := make([]rune, N)
 		ReadBytes(indexes)
 
-		alphabetSize := byte(len(alphabet_))
+		alphabetSize := byte(len(alphabetCopy))
 
 		for i := 0; i < N; i++ {
 			index := indexes[i] % alphabetSize
-			runes[i] = alphabet_[index]
+			runes[i] = alphabetCopy[index]
 		}
 
 		return string(runes)
